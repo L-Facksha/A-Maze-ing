@@ -39,6 +39,7 @@ class test:
             self.grid.append(a)
         return self.grid
 
+    # TODO -> hnaya kanchof yak ma position kharja bra grid
     def check_bounds(self, col, row):
         if 0 <= col < self.width and 0 <= row < self.height:
             return True
@@ -48,12 +49,14 @@ class test:
         if self.check_bounds(col, row):
             self.grid[row][col] &= ~wall_bit
 
+    # TODO -> hnaya kn9lb 3la neighbors o kanchof wach visited olala
     def get_neighbors(self, col: int, row: int, visited: set) -> List[tuple[int, int]]:
         nieghbors = []
 
         for direction, (dx, dy), in self.direction.items():
             nx = col + dx
             ny = row + dy
+            # TODO -> hnaya kanchof N, S, E, W li i9der idoz lihom
             if self.check_bounds(nx, ny) and (nx, ny) not in visited:
                 nieghbors.append((nx, ny))
 
