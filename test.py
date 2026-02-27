@@ -1,6 +1,7 @@
 from typing import List
 import curses
 import random
+from random import seed
 
 
 class test:
@@ -79,10 +80,15 @@ class test:
         stack = [entry]
         visited = {entry}
 
+        random.seed(42)
         while stack:
             col, row = stack[-1]
             neighbors = self.get_neighbors(col, row, visited)
             if neighbors:
+                # nb = random.seed(10)
+                # print(round(random.random()))
+                # print(nb)
+                # random.seed(42)
                 next_col, next_row = random.choice(neighbors)
                 self.carve(col, row, next_col, next_row)
                 visited.add((next_col, next_row))
@@ -95,7 +101,7 @@ class test:
 def print_maze(grid, width, height):
     """Print maze as ASCII art."""
     for row in range(height):
-        # top walls
+
         line = ""
         for col in range(width):
             cell = grid[row][col]
@@ -103,7 +109,6 @@ def print_maze(grid, width, height):
         line += "+"
         print(line)
 
-        # west walls
         line = ""
         for col in range(width):
             cell = grid[row][col]
@@ -111,13 +116,12 @@ def print_maze(grid, width, height):
         line += "|"
         print(line)
 
-    # bottom border
     print("+" + "--+" * width)
 
 
-tt = test(10, 10)
+tt = test(25, 25)
 grid = tt.generate((0, 0))
-print_maze(grid, 10, 10)
+print_maze(grid, 25, 25)
 
 
 # def display_maze(stdscr, grid):

@@ -9,12 +9,16 @@ class Mazeconf():
     exit: tuple[int, int]
     output_file: str
     perfect: bool
+    seed: int | None = None
 
 
 def pars_config(filepath: str) -> Mazeconf | None:
     data = {}
     mandatory = ['WIDTH', 'HEIGHT', 'ENTRY',
                  'EXIT', 'OUTPUT_FILE', 'PERFECT']
+    optional = ['SEED']
+    allowed = mandatory + optional
+
     try:
         with open(filepath, 'r') as f:
             for line in f:
@@ -31,11 +35,11 @@ def pars_config(filepath: str) -> Mazeconf | None:
                 value = value.strip()
 
                 # TODO -> had l if li teht kthandli gha keys maghankhdmoch bihom
-                if key not in mandatory:
+                if key not in allowed:
                     print(f"WARNING: unknown key ignored: {key}")
                     continue
 
-                #TODO -> hadi ila 3titi key witout value
+                # TODO -> hadi ila 3titi key witout value
                 if not value:
                     print(f"ERROR: empty value for key: {key}")
                     return None
@@ -51,7 +55,7 @@ def pars_config(filepath: str) -> Mazeconf | None:
         print(f"ERROR: file not found {filepath}")
         return None
 
-    #TODO -> hna kanhandli gha integer number
+    # TODO -> hna kanhandli gha integer number
     try:
         width = int(data['WIDTH'])
         height = int(data['HEIGHT'])
@@ -88,6 +92,14 @@ def pars_config(filepath: str) -> Mazeconf | None:
     if data['PERFECT'] not in ('True', 'False'):
         print("ERROR: PERFECT must be True or False")
         return None
+        
+    seed = None
+    if 'SEED' in data:
+        try:
+            seed = int(data['SEED'])
+        except ValueError:
+            print("ERROR: SEED must be an integer")
+            return None
 
     return Mazeconf(
         width=width,
@@ -95,7 +107,8 @@ def pars_config(filepath: str) -> Mazeconf | None:
         entry=entry,
         exit=exit1,
         output_file=data['OUTPUT_FILE'],
-        perfect=data['PERFECT'] == 'True'
+        perfect=data['PERFECT'] == 'True',
+        seed=seed
     )
 
 
