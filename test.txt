@@ -4,5 +4,3 @@ ENTRY = 10,13
 EXIT = 10,14
 OUTPUT_FILE = maze.txt
 PERFECT = True
-SEED = 
-hlkvd = 

@@ -112,5 +112,5 @@ def pars_config(filepath: str) -> Mazeconf | None:
     )
 
 
-tt = pars_config("test.txt")
-print(tt)
+# tt = pars_config("test.txt")
+# print(tt)

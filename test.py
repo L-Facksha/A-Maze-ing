@@ -1,7 +1,8 @@
 from typing import List
+import sys
 import curses
 import random
-from random import seed
+from config import pars_config
 
 
 class test:
@@ -75,20 +76,19 @@ class test:
                 self.remove_wall(nx, ny, opp_wall)
                 break
 
-    def generate(self, entry: tuple[int, int]) -> List[List[int]]:
+    def generate(self, entry: tuple[int, int], se: int | None) -> List[List[int]]:
         self.mz()
         stack = [entry]
         visited = {entry}
 
-        random.seed(42)
+        if se is not None:
+            random.seed(se)
+        else:
+            random.seed(None)
         while stack:
             col, row = stack[-1]
             neighbors = self.get_neighbors(col, row, visited)
             if neighbors:
-                # nb = random.seed(10)
-                # print(round(random.random()))
-                # print(nb)
-                # random.seed(42)
                 next_col, next_row = random.choice(neighbors)
                 self.carve(col, row, next_col, next_row)
                 visited.add((next_col, next_row))
@@ -119,9 +119,23 @@ def print_maze(grid, width, height):
     print("+" + "--+" * width)
 
 
-tt = test(25, 25)
-grid = tt.generate((0, 0))
-print_maze(grid, 25, 25)
+def main(argv):
+    if len(argv) != 2:
+        print("ERROR: usage: python3 a_maze_ing.py config.txt")
+        return None
+    try:
+        file = argv[-1]
+        data = pars_config(file)
+
+        tt = test(data.width, data.height)
+        grid = tt.generate((data.entry), data.seed)
+        print_maze(grid, data.width, data.height)
+    except Exception as error:
+        print(f"ERROR: {error}")
+        return None
+
+
+main(sys.argv)
 
 
 # def display_maze(stdscr, grid):
