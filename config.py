@@ -92,7 +92,7 @@ def pars_config(filepath: str) -> Mazeconf | None:
     if data['PERFECT'] not in ('True', 'False'):
         print("ERROR: PERFECT must be True or False")
         return None
-        
+
     seed = None
     if 'SEED' in data:
         try:
@@ -110,7 +110,3 @@ def pars_config(filepath: str) -> Mazeconf | None:
         perfect=data['PERFECT'] == 'True',
         seed=seed
     )
-
-
-# tt = pars_config("test.txt")
-# print(tt)

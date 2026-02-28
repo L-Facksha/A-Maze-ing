@@ -30,7 +30,7 @@ class test:
     def __init__(self, width, height):
         self.height = height
         self.width = width
-        self.grid: List[List[str]] = []
+        self.grid: List[List[int]] = []
 
     def mz(self):
         self.grid = []
@@ -52,10 +52,10 @@ class test:
             self.grid[row][col] &= ~wall_bit
 
     # TODO -> hnaya kn9lb 3la neighbors o kanchof wach visited olala
-    def get_neighbors(self, col: int, row: int, visited: set) -> List[tuple[int, int]]:
+    def get_neighbors(self, col: int, row: int, visited: set) -> List[tuple[int, int]]: # noqa
         nieghbors = []
 
-        for direction, (dx, dy) in self.direction.items():
+        for _, (dx, dy) in self.direction.items():
             nx = col + dx
             ny = row + dy
             # TODO -> hnaya kanchof N, S, E, W li i9der idoz lihom
@@ -76,7 +76,7 @@ class test:
                 self.remove_wall(nx, ny, opp_wall)
                 break
 
-    def generate(self, entry: tuple[int, int], se: int | None) -> List[List[int]]:
+    def generate(self, entry: tuple[int, int], se: int | None) -> List[List[int]]: # noqa
         self.mz()
         stack = [entry]
         visited = {entry}
@@ -112,19 +112,19 @@ def print_maze(stdscr, generator, width, height, data):
 
     color_index = 1
     show_color_menu = False
-    
+
     while True:
         stdscr.clear()
 
         if show_color_menu:
-            stdscr.addstr(height * 2 + 2, 0, "Choose Color", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(3))
-            stdscr.addstr(height * 2 + 3, 0, "1. WHITE", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
-            stdscr.addstr(height * 2 + 4, 0, "2. CYAN", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
-            stdscr.addstr(height * 2 + 5, 0, "3. GREEN", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
-            stdscr.addstr(height * 2 + 6, 0, "4. MAGENTA", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
-            stdscr.addstr(height * 2 + 7, 0, "5. RED", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
-            stdscr.addstr(height * 2 + 8, 0, "6. YELLOW", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
-            stdscr.addstr(height * 2 + 9, 0, "7. BLUE", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
+            stdscr.addstr(0, 0, "=== Choose Color ===", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(3)) # noqa
+            stdscr.addstr(1, 0, "1. WHITE", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1)) # noqa
+            stdscr.addstr(2, 0, "2. CYAN", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1)) # noqa
+            stdscr.addstr(3, 0, "3. GREEN", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1)) # noqa
+            stdscr.addstr(4, 0, "4. MAGENTA", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1)) # noqa
+            stdscr.addstr(5, 0, "5. RED", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1)) # noqa
+            stdscr.addstr(6, 0, "6. YELLOW", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1)) # noqa
+            stdscr.addstr(7, 0, "7. BLUE", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1)) # noqa
 
         else:
             grid = generator.grid
@@ -136,23 +136,22 @@ def print_maze(stdscr, generator, width, height, data):
                     cell = grid[row][col]
                     top_line += "███" if cell & 1 else "█  "
                 top_line += "█"
-                stdscr.addstr(row * 2, 0, top_line, curses.color_pair(color_index))
+                stdscr.addstr(row * 2, 0, top_line, curses.color_pair(color_index)) # noqa
 
                 west_line = ""
                 for col in range(width):
                     cell = grid[row][col]
                     west_line += "█  " if cell & 8 else "   "
                 west_line += "█"
-                stdscr.addstr(row * 2 + 1, 0, west_line, curses.color_pair(color_index))
+                stdscr.addstr(row * 2 + 1, 0, west_line, curses.color_pair(color_index)) # noqa
 
-            stdscr.addstr(height * 2, 0, "█" + "███" * width, curses.color_pair(color_index))
+            stdscr.addstr(height * 2, 0, "█" + "███" * width, curses.color_pair(color_index)) # noqa
 
-            stdscr.addstr(height * 2 + 2, 0, "=== A-Maze-ing ===", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(3))
-            stdscr.addstr(height * 2 + 3, 0, "1. Re-generate a new maze", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
-            stdscr.addstr(height * 2 + 4, 0, "2. Show/Hide path from entry to exit", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
-            stdscr.addstr(height * 2 + 5, 0, "3. Rotate maze colors", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
-            stdscr.addstr(height * 2 + 6, 0, "4. Quit", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
-            stdscr.addstr(height * 2 + 7, 0, "=== A-Maze-ing ===", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
+            stdscr.addstr(height * 2 + 2, 0, "=== A-Maze-ing ===", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(3)) # noqa
+            stdscr.addstr(height * 2 + 3, 0, "1. Re-generate a new maze", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1)) # noqa
+            stdscr.addstr(height * 2 + 4, 0, "2. Show/Hide path from entry to exit", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1)) # noqa
+            stdscr.addstr(height * 2 + 5, 0, "3. Rotate maze colors", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1)) # noqa
+            stdscr.addstr(height * 2 + 6, 0, "4. Quit", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1)) # noqa
 
         stdscr.refresh()
         key = stdscr.getch()
