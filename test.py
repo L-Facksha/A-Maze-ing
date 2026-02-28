@@ -55,7 +55,7 @@ class test:
     def get_neighbors(self, col: int, row: int, visited: set) -> List[tuple[int, int]]:
         nieghbors = []
 
-        for direction, (dx, dy), in self.direction.items():
+        for direction, (dx, dy) in self.direction.items():
             nx = col + dx
             ny = row + dy
             # TODO -> hnaya kanchof N, S, E, W li i9der idoz lihom
@@ -98,25 +98,97 @@ class test:
         return self.grid
 
 
-def print_maze(grid, width, height):
-    """Print maze as ASCII art."""
-    for row in range(height):
+def print_maze(stdscr, generator, width, height, data):
+    curses.curs_set(0)
+    curses.start_color()
 
-        line = ""
-        for col in range(width):
-            cell = grid[row][col]
-            line += "+--" if cell & 1 else "+  "
-        line += "+"
-        print(line)
+    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
+    curses.init_pair(2, curses.COLOR_CYAN, curses.COLOR_BLACK)
+    curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    curses.init_pair(4, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
+    curses.init_pair(5, curses.COLOR_RED, curses.COLOR_BLACK)
+    curses.init_pair(6, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    curses.init_pair(7, curses.COLOR_BLUE, curses.COLOR_BLACK)
 
-        line = ""
-        for col in range(width):
-            cell = grid[row][col]
-            line += "|  " if cell & 8 else "   "
-        line += "|"
-        print(line)
+    color_index = 1
+    show_color_menu = False
+    
+    while True:
+        stdscr.clear()
 
-    print("+" + "--+" * width)
+        if show_color_menu:
+            stdscr.addstr(height * 2 + 2, 0, "Choose Color", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(3))
+            stdscr.addstr(height * 2 + 3, 0, "1. WHITE", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
+            stdscr.addstr(height * 2 + 4, 0, "2. CYAN", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
+            stdscr.addstr(height * 2 + 5, 0, "3. GREEN", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
+            stdscr.addstr(height * 2 + 6, 0, "4. MAGENTA", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
+            stdscr.addstr(height * 2 + 7, 0, "5. RED", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
+            stdscr.addstr(height * 2 + 8, 0, "6. YELLOW", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
+            stdscr.addstr(height * 2 + 9, 0, "7. BLUE", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
+
+        else:
+            grid = generator.grid
+
+            for row in range(height):
+
+                top_line = ""
+                for col in range(width):
+                    cell = grid[row][col]
+                    top_line += "███" if cell & 1 else "█  "
+                top_line += "█"
+                stdscr.addstr(row * 2, 0, top_line, curses.color_pair(color_index))
+
+                west_line = ""
+                for col in range(width):
+                    cell = grid[row][col]
+                    west_line += "█  " if cell & 8 else "   "
+                west_line += "█"
+                stdscr.addstr(row * 2 + 1, 0, west_line, curses.color_pair(color_index))
+
+            stdscr.addstr(height * 2, 0, "█" + "███" * width, curses.color_pair(color_index))
+
+            stdscr.addstr(height * 2 + 2, 0, "=== A-Maze-ing ===", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(3))
+            stdscr.addstr(height * 2 + 3, 0, "1. Re-generate a new maze", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
+            stdscr.addstr(height * 2 + 4, 0, "2. Show/Hide path from entry to exit", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
+            stdscr.addstr(height * 2 + 5, 0, "3. Rotate maze colors", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
+            stdscr.addstr(height * 2 + 6, 0, "4. Quit", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
+            stdscr.addstr(height * 2 + 7, 0, "=== A-Maze-ing ===", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))
+
+        stdscr.refresh()
+        key = stdscr.getch()
+
+        if show_color_menu:
+            if key == ord("1"):
+                color_index = 1
+                show_color_menu = False
+            if key == ord("2"):
+                color_index = 2
+                show_color_menu = False
+            if key == ord("3"):
+                color_index = 3
+                show_color_menu = False
+            if key == ord("4"):
+                color_index = 4
+                show_color_menu = False
+            if key == ord("5"):
+                color_index = 5
+                show_color_menu = False
+            if key == ord("6"):
+                color_index = 6
+                show_color_menu = False
+            if key == ord("7"):
+                color_index = 7
+                show_color_menu = False
+        else:
+            if key == ord("1"):
+                generator.generate(data.entry, data.seed)
+
+            if key == ord("3"):
+                show_color_menu = True
+
+                # color_index = (color_index % 7) + 1
+            if key == ord("4"):
+                break
 
 
 def main(argv):
@@ -126,48 +198,16 @@ def main(argv):
     try:
         file = argv[-1]
         data = pars_config(file)
+        if data is None:
+            return None
 
         tt = test(data.width, data.height)
-        grid = tt.generate((data.entry), data.seed)
-        print_maze(grid, data.width, data.height)
+        tt.generate((data.entry), data.seed)
+
+        curses.wrapper(print_maze, tt, data.width, data.height, data)
     except Exception as error:
         print(f"ERROR: {error}")
         return None
 
 
 main(sys.argv)
-
-
-# def display_maze(stdscr, grid):
-#     curses.curs_set(0)
-
-#     curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
-
-#     while True:
-#         stdscr.clear()
-
-#         for y, row in enumerate(grid):
-#             for x, cell in enumerate(row):
-#                 stdscr.attron(curses.color_pair(1))
-#                 stdscr.addstr(y, x, "█")
-#                 stdscr.attroff(curses.color_pair(1))
-
-#         stdscr.attron(curses.color_pair(1))
-#         stdscr.addstr(len(grid) + 1, 0, "Press 'q' to quit, 'r' to regenerate")
-#         stdscr.attroff(curses.color_pair(1))
-
-#         stdscr.refresh()
-
-#         key = stdscr.getch()
-
-#         if key == ord('q'):
-#             break
-#         elif key == ord('r'):
-#             grid = test(10, 15).mz()
-#             continue
-
-
-# tt = test(10, 20)
-# a = tt.mz()
-
-# curses.wrapper(display_maze, a)
