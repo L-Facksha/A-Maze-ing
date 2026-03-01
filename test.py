@@ -32,7 +32,7 @@ class test:
         self.height = height
         self.width = width
         self.grid: List[List[int]] = []
-        self.visited: set
+        self.visited: set = set()
 
     def mz(self):
         self.grid = []
@@ -78,11 +78,34 @@ class test:
                 self.remove_wall(nx, ny, opp_wall)
                 break
 
-    def generate(self, entry: tuple[int, int], end: tuple[int, int], se: int | None) -> List[List[int]]:  # noqa
+    def make_imperfect(self, chance=0.05):
+        for y in range(self.height):
+            for x in range(self.width):
+                for direction, (dx, dy) in self.direction.items():
+                    nx = x + dx
+                    ny = y + dy
+
+                    # only if inside grid
+                    if not self.check_bounds(nx, ny):
+                        continue
+
+                    # remove wall randomly
+                    if random.random() < chance:
+                        wall = self.wall_bits[direction]
+                        opposite = self.wall_bits[self.opposite_direction[direction]]
+
+                        self.remove_wall(x, y, wall)
+                        self.remove_wall(nx, ny, opposite)
+
+    def generate(self, entry: tuple[int, int], end: tuple[int, int], se: int | None, perfect: bool = True) -> List[List[int]]:  # noqa
         self.mz()
         self.visited = set()
         self.print_42()
-        if entry in self.visited or end in self.visited:
+        y, x = entry
+        ye, xe = end
+        print(entry)
+        swapped = {(x, y) for (y, x) in self.visited}
+        if entry in swapped or end in swapped:
             return None
         stack = [entry]
         self.visited.add(entry)
@@ -101,14 +124,11 @@ class test:
                 stack.append((next_x, next_y))
             else:
                 stack.pop()
+        if not perfect:
+            self.make_imperfect(0.05)
         return self.grid
 
     def print_42(self):
-        if self.width < 10 or self.height < 7:
-            print("ERROR: maze too small to display 42 pattern")
-            return
-        x = round(self.width / 2 - 3)
-        y = round(self.height / 2 - 2)
         set_42 = [
             [1, 0, 0, 0, 1, 1, 1, 0],
             [1, 0, 0, 0, 0, 0, 1, 0],
@@ -116,6 +136,19 @@ class test:
             [0, 0, 1, 0, 1, 0, 0, 0],
             [0, 0, 1, 0, 1, 1, 1, 0]
         ]
+
+        patteren_height = len(set_42)
+        patteren_width = len(set_42[0])
+
+        if self.width < patteren_width or self.height < patteren_height:
+            print("ERROR: maze too small to display 42 pattern")
+            return
+
+        if not self.grid:
+            self.mz()
+
+        x = max((self.width - patteren_width) // 2, 0)
+        y = max((self.height - patteren_height) // 2, 0)
         for r in set_42:
             col = x
             for c in r:
@@ -124,6 +157,7 @@ class test:
                     self.visited.add((col, y))
                 col += 1
             y += 1
+        print(self.visited)
 
     def print_maze(self, stdscr, generator, width, height, data, path):
         curses.curs_set(0)
@@ -184,12 +218,11 @@ class test:
                     for y, x in path:
                         stdscr.addstr(y * 2 + 1, x * 3 + 1, "•",
                                       curses.color_pair(5) | curses.A_BOLD)
-                # Draw start
-                sx, sy = data.entry
+
+                sy, sx = data.entry
                 stdscr.addstr(sy * 2 + 1, sx * 3 + 1, "S",
                               curses.color_pair(3) | curses.A_BOLD)
 
-                # Draw end
                 ey, ex = data.exit1
                 stdscr.addstr(ey * 2 + 1, ex * 3 + 1, "E",
                               curses.color_pair(5) | curses.A_BOLD)
@@ -221,7 +254,7 @@ class test:
                     show_color_menu = False
             else:
                 if key == ord("1"):
-                    generator.generate(data.entry, data.exit1, data.seed)
+                    generator.generate(data.entry, data.exit1, data.seed, data.perfect)
                     path = bfs.bfs(generator.grid, data.entry, data.exit1)
 
                 if key == ord("2"):
@@ -245,13 +278,17 @@ def main(argv):
         return None
 
     grid = test(data.width, data.height)
-    result = grid.generate((data.entry), data.exit1, data.seed)
+
+    result = grid.generate((data.entry), data.exit1, data.seed, data.perfect)
+    print(result)
     if result is None:
+        print("ERROR: ENTRY or EXIT overlaps 42 patteren")
         return None
+
     path = bfs.bfs(grid.grid, data.entry, data.exit1)
 
     curses.wrapper(grid.print_maze, grid, data.width, data.height, data, path)
-    print(path)
+    # print(path)
     # except Exception as error:
     #     print(f"ERROR: {error}")
     #     return None
