@@ -6,7 +6,7 @@ class Mazeconf():
     width: int
     height: int
     entry: tuple[int, int]
-    exit: tuple[int, int]
+    exit1: tuple[int, int]
     output_file: str
     perfect: bool
     seed: int | None = None
@@ -105,7 +105,7 @@ def pars_config(filepath: str) -> Mazeconf | None:
         width=width,
         height=height,
         entry=entry,
-        exit=exit1,
+        exit1=exit1,
         output_file=data['OUTPUT_FILE'],
         perfect=data['PERFECT'] == 'True',
         seed=seed
