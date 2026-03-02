@@ -34,18 +34,15 @@ def pars_config(filepath: str) -> Mazeconf | None:
                 key = key.strip()
                 value = value.strip()
 
-                # TODO -> had l if li teht kthandli gha keys maghankhdmoch bihom
                 if key not in allowed:
                     print(f"WARNING: unknown key ignored: {key}")
                     continue
 
-                # TODO -> hadi ila 3titi key witout value
                 if not value:
                     print(f"ERROR: empty value for key: {key}")
                     return None
                 data[key] = value
 
-        # TODO -> o hadi kathandli ila nsiti chi key li khessk tkhdem bih
         for key in mandatory:
             if key not in data:
                 print(f"ERROR: missing key: {key}")
@@ -55,7 +52,6 @@ def pars_config(filepath: str) -> Mazeconf | None:
         print(f"ERROR: file not found {filepath}")
         return None
 
-    # TODO -> hna kanhandli gha integer number
     try:
         width = int(data['WIDTH'])
         height = int(data['HEIGHT'])
@@ -63,7 +59,6 @@ def pars_config(filepath: str) -> Mazeconf | None:
         print("ERROR: WIDTH and HEIGHT must be integers")
         return None
 
-    # TODO -> khesso ikon 3el 2a9al kber mn 3
     if width < 3 or height < 3:
         print("ERROR: WIDTH and HEIGHT must be at least 3")
         return None
@@ -77,11 +72,11 @@ def pars_config(filepath: str) -> Mazeconf | None:
         print("ERROR: ENTRY and EXIT must be in format x, y")
         return None
 
-    if not (0 <= entry[0] < width and 0 <= entry[1] < height):
+    if not (0 <= entry[0] < height and 0 <= entry[1] < width):
         print("ERROR: ENTRY is outside maze bounds")
         return None
 
-    if not (0 <= exit1[0] < width and 0 <= exit1[1] < height):
+    if not (0 <= exit1[0] < height and 0 <= exit1[1] < width):
         print("ERROR: EXIT is outside maze bounds")
         return None
 
