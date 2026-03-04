@@ -2,7 +2,19 @@ from dataclasses import dataclass
 
 
 @dataclass
-class Mazeconf():
+class MazeConf:
+    """
+    Data class representing the maze configuration.
+
+    Attributes:
+        width: Width of the maze.
+        height: Height of the maze.
+        entry: Entry coordinates (row, column).
+        exit1: Exit coordinates (row, column).
+        output_file: Output file path.
+        perfect: Whether the maze should be perfect.
+        seed: Optional random seed.
+    """
     width: int
     height: int
     entry: tuple[int, int]
@@ -12,8 +24,22 @@ class Mazeconf():
     seed: int | None = None
 
 
-def pars_config(filepath: str) -> Mazeconf | None:
-    data = {}
+def pars_config(filepath: str) -> MazeConf | None:
+    """
+    Parse a configuration file and return a MazeConf object.
+
+    The configuration file must contain mandatory keys:
+    WIDTH, HEIGHT, ENTRY, EXIT, OUTPUT_FILE, PERFECT.
+    Optional key: SEED.
+
+    Args:
+        filepath: Path to the configuration file.
+
+    Returns:
+        A MazeConf object if parsing is successful,
+        otherwise None if an error occurs.
+    """
+    data: dict[str, str] = {}
     mandatory = ['WIDTH', 'HEIGHT', 'ENTRY',
                  'EXIT', 'OUTPUT_FILE', 'PERFECT']
     optional = ['SEED']
@@ -28,6 +54,10 @@ def pars_config(filepath: str) -> Mazeconf | None:
 
                 if "=" not in line:
                     print(f"ERROR: Invalid format: {line}")
+                    return None
+                key, value = line.split("=", 1)
+                if key.strip() != key or value.strip() != value:
+                    print(f"ERROR: valide format: KEY=VALUE: {line}")
                     return None
 
                 key, value = line.split("=", 1)
@@ -64,19 +94,38 @@ def pars_config(filepath: str) -> Mazeconf | None:
         return None
 
     try:
-        entry = (int(data['ENTRY'].split(',')[0]),
-                 int(data['ENTRY'].split(',')[1]))
-        exit1 = (int(data['EXIT'].split(',')[0]),
-                 int(data['EXIT'].split(',')[1]))
-    except (ValueError, IndexError):
-        print("ERROR: ENTRY and EXIT must be in format x, y")
+        entry = data['ENTRY']
+        if " " in entry:
+            raise ValueError("ERROR: ENTRY: Format must be x,y")
+
+        content = entry[0:3]
+        ex, ey = content.split(",")
+
+        if not ex.isdigit() or not ey.isdigit():
+            raise ValueError("ERROR: x and y must be integers in (ENTRY)")
+
+        entry = (int(ex), int(ey))
+
+        exit1 = data['EXIT']
+        if " " in exit1:
+            raise ValueError("ERROR: EXIT: Format must be x,y")
+
+        content = exit1[0:3]
+        ex, ey = content.split(",")
+
+        if not ex.isdigit() or not ey.isdigit():
+            raise ValueError("ERROR: x and y must be integers in (EXIT)")
+
+        exit1 = (int(ex), int(ey))
+    except (ValueError, IndexError) as error:
+        print(error)
         return None
 
-    if not (0 <= entry[0] < height and 0 <= entry[1] < width):
+    if not (0 <= entry[0] < width and 0 <= entry[1] < height):
         print("ERROR: ENTRY is outside maze bounds")
         return None
 
-    if not (0 <= exit1[0] < height and 0 <= exit1[1] < width):
+    if not (0 <= exit1[0] < width and 0 <= exit1[1] < height):
         print("ERROR: EXIT is outside maze bounds")
         return None
 
@@ -96,7 +145,7 @@ def pars_config(filepath: str) -> Mazeconf | None:
             print("ERROR: SEED must be an integer")
             return None
 
-    return Mazeconf(
+    return MazeConf(
         width=width,
         height=height,
         entry=entry,

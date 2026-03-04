@@ -1,16 +1,16 @@
-[project]
-name = "A-Maze-ing"
+[tool.poetry]
+name = "a-maze-ing"
 version = "0.1.0"
 description = "A maze generator"
-authors = [
-    {name = "None"}
-]
-requires-python = ">=3.13"
-dependencies = [
-    "flake8 (>=7.3.0,<8.0.0)",
-    "mypy (>=1.19.1,<2.0.0)"
-]
+authors = ["PiziGa"]
+packages = [{include = "mazegen"}]
 
+[tool.poetry.dependencies]
+python = ">=3.13"
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^7.3.0"
+mypy = "^1.19.1"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

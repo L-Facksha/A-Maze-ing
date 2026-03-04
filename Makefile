@@ -1,4 +1,5 @@
 install:
+	pip install poetry
 	poetry install
 
 run:
@@ -8,20 +9,17 @@ debug:
 	poetry run python3 -m pdb a_maze_ing.py config.txt
 
 clean:
-	rm -rf __pycache__ .mypy_cache *.pyc
-	rm -rf mazegen/__pycache__ mazegen/dist mazegen/*.egg-info
+	rm -rf __pycache__ .mypy_cache *.pyc dist
+	rm -rf mazegen/__pycache__ mazegen/*.egg-info
 	find . -name "*.pyc" -delete
 	find . -name "__pycache__" -delete
+	find . -name "poetry.lock" -delete
 
 lint:
-	poetry run flake8 .
-	poetry run mypy a_maze_ing.py config.py display.py m_to_hex.py --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
-
-lint-strict:
-	poetry run flake8 .
-	poetry run mypy a_maze_ing.py config.py display.py m_to_hex.py --strict
+	poetry run flake8 . --exclude=.venv,__pycache__
+	poetry run mypy mazegen/ --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
 
 build:
-	cd mazegen && python3 -m build
-	cp mazegen/dist/mazegen-*.whl .
-	cp mazegen/dist/mazegen-*.tar.gz .
+	poetry build
+	cp dist/*.whl .
+	rm -rf dist

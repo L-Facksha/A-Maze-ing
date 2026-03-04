@@ -1,10 +1,37 @@
 import curses
-from mazegen import bfs
-from m_to_hex import m_to_hex
+from typing import List
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mazegen import MazeGenerator
+    from config import MazeConf
+from mazegen.bfs import bfs
+from mazegen.m_to_hex import m_to_hex
 import time
 
 
-def print_maze(stdscr, generator, width, height, data, path, visited_42):
+def print_maze(stdscr: curses.window, generator: "MazeGenerator", width: int, height: int, data: "MazeConf", path: List[tuple[int, int]], visited_42: set[tuple[int, int]]) -> None: # noqa
+    """
+    Display the maze using curses and provide an interactive menu.
+
+    Allows the user to:
+        - Regenerate the maze
+        - Toggle display of the shortest path
+        - Change maze colors
+        - Quit the program
+
+    Args:
+        stdscr: The curses window object.
+        generator: MazeGenerator instance containing the maze grid.
+        width: Width of the maze.
+        height: Height of the maze.
+        data: Maze configuration data.
+        path: Shortest path from entry to exit.
+        visited_42: Cells belonging to the 42 pattern.
+
+    Returns:
+        None
+    """
     curses.curs_set(0)
     curses.start_color()
 
@@ -36,15 +63,46 @@ def print_maze(stdscr, generator, width, height, data, path, visited_42):
             if not generator.visited_42:
                 stdscr.addstr(height * 2 + 7, 0, "WARNING: maze too small for 42 pattern", curses.color_pair(5) | curses.A_BOLD) # noqa
             grid = generator.grid
-
+            
             for y in range(height):
-
                 top_line = ""
                 for x in range(width):
                     cell = grid[y][x]
-                    top_line += "███" if cell & 1 else "█  "
-                top_line += "█"
-                stdscr.addstr(y * 2, 0, top_line, curses.color_pair(color_index))  # noqa
+
+                    corner_needed = False
+
+                    if x == 0 or y == 0:
+                        corner_needed = True   
+                    else:
+                        above_left  = grid[y-1][x-1]
+                        above_right = grid[y-1][x]
+                        below_left  = grid[y][x-1]
+
+                        east_of_above_left  = above_left  & 2   
+                        north_of_below_left = below_left  & 1   
+                        west_of_above_right = above_right & 8   
+                        north_of_current    = cell        & 1   
+
+                        corner_needed = any([
+                            east_of_above_left,
+                            north_of_below_left,
+                            west_of_above_right,
+                            north_of_current
+                        ])
+
+                    corner_char = "█" if corner_needed else " "
+
+                    top_line += corner_char + ("██" if cell & 1 else "  ")
+
+                if y == 0:
+                    top_line += "█"
+                else:
+                    last_above = grid[y-1][width-1]
+                    last_below = grid[y][width-1]
+                    right_border_needed = (last_above & 4) or (last_below & 1) or (last_below & 2)
+                    top_line += "█" if right_border_needed else " "
+
+                stdscr.addstr(y * 2, 0, top_line, curses.color_pair(color_index))
 
                 for x in range(width):
                     if (x, y) in visited_42:
@@ -70,17 +128,18 @@ def print_maze(stdscr, generator, width, height, data, path, visited_42):
             stdscr.addstr(height * 2 + 4, 0, "2. Show/Hide path from entry to exit", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))  # noqa
             stdscr.addstr(height * 2 + 5, 0, "3. Rotate maze colors", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))  # noqa
             stdscr.addstr(height * 2 + 6, 0, "4. Quit", curses.A_ITALIC | curses.A_BOLD | curses.color_pair(1))  # noqa
+
             if path_show:
-                for y, x in path:
+                for x, y in path:
                     stdscr.addstr(y * 2 + 1, x * 3 + 1, "•",
                                   curses.color_pair(5) | curses.A_BOLD)
                 time.sleep(0.05)
 
-            sy, sx = data.entry
+            sx, sy = data.entry
             stdscr.addstr(sy * 2 + 1, sx * 3 + 1, "S",
                           curses.color_pair(3) | curses.A_BOLD)
 
-            ey, ex = data.exit1
+            ex, ey = data.exit1
             stdscr.addstr(ey * 2 + 1, ex * 3 + 1, "E",
                           curses.color_pair(5) | curses.A_BOLD)
 
@@ -114,7 +173,7 @@ def print_maze(stdscr, generator, width, height, data, path, visited_42):
                            data.exit1, data.width, data.height)
                 time.sleep(0.05)
                 m_to_hex(generator.grid, data.entry, data.exit1,
-                         data.width, data.height, path)
+                         data.width, data.height, path, data.output_file)
 
             if key == ord("2"):
                 path_show = not path_show
