@@ -10,7 +10,7 @@ from mazegen.m_to_hex import m_to_hex
 import time
 
 
-def print_maze(stdscr: curses.window, generator: "MazeGenerator", width: int, height: int, data: "MazeConf", path: List[tuple[int, int]], visited_42: set[tuple[int, int]]) -> None: # noqa
+def print_maze(stdscr: curses.window, generator: "MazeGenerator", width: int, height: int, data: "MazeConf", path: List[tuple[int, int]], visited_42: set[tuple[int, int]]) -> None:  # noqa
     """
     Display the maze using curses and provide an interactive menu.
 
@@ -61,9 +61,9 @@ def print_maze(stdscr: curses.window, generator: "MazeGenerator", width: int, he
 
         else:
             if not generator.visited_42:
-                stdscr.addstr(height * 2 + 7, 0, "WARNING: maze too small for 42 pattern", curses.color_pair(5) | curses.A_BOLD) # noqa
+                stdscr.addstr(height * 2 + 7, 0, "WARNING: maze too small for 42 pattern", curses.color_pair(5) | curses.A_BOLD)  # noqa
             grid = generator.grid
-            
+
             for y in range(height):
                 top_line = ""
                 for x in range(width):
@@ -72,16 +72,16 @@ def print_maze(stdscr: curses.window, generator: "MazeGenerator", width: int, he
                     corner_needed = False
 
                     if x == 0 or y == 0:
-                        corner_needed = True   
+                        corner_needed = True
                     else:
-                        above_left  = grid[y-1][x-1]
+                        above_left = grid[y-1][x-1]
                         above_right = grid[y-1][x]
-                        below_left  = grid[y][x-1]
+                        below_left = grid[y][x-1]
 
-                        east_of_above_left  = above_left  & 2   
-                        north_of_below_left = below_left  & 1   
-                        west_of_above_right = above_right & 8   
-                        north_of_current    = cell        & 1   
+                        east_of_above_left = above_left & 2
+                        north_of_below_left = below_left & 1
+                        west_of_above_right = above_right & 8
+                        north_of_current = cell & 1
 
                         corner_needed = any([
                             east_of_above_left,
@@ -99,10 +99,12 @@ def print_maze(stdscr: curses.window, generator: "MazeGenerator", width: int, he
                 else:
                     last_above = grid[y-1][width-1]
                     last_below = grid[y][width-1]
-                    right_border_needed = (last_above & 4) or (last_below & 1) or (last_below & 2)
+                    right_border_needed = (last_above & 4) or (
+                        last_below & 1) or (last_below & 2)
                     top_line += "█" if right_border_needed else " "
 
-                stdscr.addstr(y * 2, 0, top_line, curses.color_pair(color_index))
+                stdscr.addstr(y * 2, 0, top_line,
+                              curses.color_pair(color_index))
 
                 for x in range(width):
                     if (x, y) in visited_42:

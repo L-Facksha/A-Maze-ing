@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "a-maze-ing"
-version = "0.1.0"
+name = "mazegen"
+version = "1.0.0"
 description = "A maze generator"
-authors = ["PiziGa"]
+authors = ["azebahad, otazelma"]
 packages = [{include = "mazegen"}]
 
 [tool.poetry.dependencies]

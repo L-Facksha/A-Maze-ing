@@ -133,6 +133,29 @@ class MazeGenerator:
                 self.remove_wall(nx, ny, opp_wall)
                 break
 
+    def check_directions(self, x: int, y: int) -> bool:
+        """
+        Checks all the adjacent cells in the directions (N, E, S, W) of the current cell in # noqa
+        order to see if it overlaps with the 42 pattern so that we can ignore it
+
+        Args:
+            x: the column of the current cell
+            y: the row of the current cell
+        
+        Returns:
+            False if any of the adjacent cells in all directions 
+            (N, E, S, W) are not part of the 42 pattern otherwise returns True
+        """
+        if ((x + 1), y) in self.visited_42:
+            return False
+        if ((x - 1), y) in self.visited_42:
+            return False
+        if (x, (y + 1)) in self.visited_42:
+            return False
+        if (x, (y - 1)) in self.visited_42:
+            return False
+        return True
+
     def make_imperfect(self, chance: float = 0.05) -> None:
         """
         Randomly remove walls to make the maze imperfect.
@@ -140,21 +163,22 @@ class MazeGenerator:
         Args:
             chance: Probability of removing a wall (default 0.05).
         """
-        if self.width * self.height < 100:
+        if self.width * self.height >= 50 and self.width * self.height <= 79:
+            chance = 0.3
+        elif self.width * self.height < 100:
             chance = 0.1
         for y in range(self.height):
             for x in range(self.width):
                 for direction, (dx, dy) in self.direction.items():
                     nx = x + dx
                     ny = y + dy
-
+                    if not self.check_directions(x, y):
+                        continue
                     if not self.check_bounds(nx, ny):
                         continue
-
                     if random.random() < chance:
                         wall = self.wall_bits[direction]
                         opposite = self.wall_bits[self.opposite_direction[direction]]  # noqa
-
                         self.remove_wall(x, y, wall)
                         self.remove_wall(nx, ny, opposite)
 
@@ -177,7 +201,6 @@ class MazeGenerator:
         self.print_42()
         x, y = entry
 
-        # swapped = {(x, y) for (y, x) in self.visited_42}
         if entry in self.visited_42 or end in self.visited_42:
             return None
 

@@ -89,16 +89,20 @@ def pars_config(filepath: str) -> MazeConf | None:
         print("ERROR: WIDTH and HEIGHT must be integers")
         return None
 
-    if width < 3 or height < 3:
-        print("ERROR: WIDTH and HEIGHT must be at least 3")
+    if width < 0 or height < 0:
+        print("ERROR: WIDTH and HEIGHT must be positive")
+        return None
+
+    if width < 7 or height < 7:
+        print("ERROR: WIDTH and HEIGHT must be at least 7")
         return None
 
     try:
-        entry = data['ENTRY']
-        if " " in entry:
+        entry_s = data['ENTRY']
+        if " " in entry_s:
             raise ValueError("ERROR: ENTRY: Format must be x,y")
-
-        content = entry[0:3]
+        entry_len = len(entry_s)
+        content = entry_s[0:entry_len + 1]
         ex, ey = content.split(",")
 
         if not ex.isdigit() or not ey.isdigit():
@@ -106,11 +110,12 @@ def pars_config(filepath: str) -> MazeConf | None:
 
         entry = (int(ex), int(ey))
 
-        exit1 = data['EXIT']
-        if " " in exit1:
+        exit1_s = data['EXIT']
+        if " " in exit1_s:
             raise ValueError("ERROR: EXIT: Format must be x,y")
 
-        content = exit1[0:3]
+        exit_len = len(exit1_s)
+        content = exit1_s[0:exit_len + 1]
         ex, ey = content.split(",")
 
         if not ex.isdigit() or not ey.isdigit():
@@ -135,6 +140,11 @@ def pars_config(filepath: str) -> MazeConf | None:
 
     if data['PERFECT'] not in ('True', 'False'):
         print("ERROR: PERFECT must be True or False")
+        return None
+
+    output_f = data['OUTPUT_FILE']
+    if not output_f.endswith(".txt"):
+        print("ERROR: OUTPUT_FILE must end with .txt!!")
         return None
 
     seed = None

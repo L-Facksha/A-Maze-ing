@@ -22,4 +22,5 @@ lint:
 build:
 	poetry build
 	cp dist/*.whl .
+	cp dist/*.tar.gz .
 	rm -rf dist
